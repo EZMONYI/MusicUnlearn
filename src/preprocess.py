@@ -101,9 +101,9 @@ def main(args):
         if args.trainpref:
             make_binary_dataset(vocab, args.trainpref, "train", lang, args.workers)
         if args.validpref:
-            for k, validpref in enumerate(args.validpref.split(",")):
-                outprefix = "valid{}".format(k) if k > 0 else "valid"
-                make_binary_dataset(vocab, validpref, outprefix, lang, args.workers)
+            make_binary_dataset(vocab, args.validpref, "valid", lang, args.workers)
+        if args.unlearnpref:
+            make_binary_dataset(vocab, args.unlearnpref, "unlearn", lang, args.workers)
 
     def dict_path(lang):
         return os.path.join(args.destdir, file_name("dict", lang)) + ".txt"
@@ -132,6 +132,7 @@ def cli_main():
     parser.add_argument("--tgtdict", default=None)
     parser.add_argument("--trainpref")
     parser.add_argument("--validpref")
+    parser.add_argument("--unlearnpref")
     parser.add_argument("--destdir")
     parser.add_argument("--workers", type=int)
     parser.add_argument("--source-lang")

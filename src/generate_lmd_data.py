@@ -319,10 +319,12 @@ def main(args):
     n = len(melody_list)
 
     melody_train = melody_list[int(n * 0.2) :]
+    melody_unlearn = melody_list[int(n * 0.2) : int(n * 0.25)]
     melody_valid = melody_list[int(n * 0.1) : int(n * 0.2)]
     melody_test = melody_list[int(n * 0.0) : int(n * 0.1)]
 
     lyric_train = lyric_list[int(n * 0.2) :]
+    lyric_unlearn = lyric_list[int(n * 0.2) : int(n * 0.25)]
     lyric_valid = lyric_list[int(n * 0.1) : int(n * 0.2)]
     lyric_test = lyric_list[int(n * 0.0) : int(n * 0.1)]
 
@@ -335,6 +337,13 @@ def main(args):
         m, l = sliding_window(melody, lyric)
         sliding_melody_train.extend(m)
         sliding_lyric_train.extend(l)
+
+    cut_melody_unlearn, cut_lyric_unlearn, song_id_unlearn = [], [], []
+    for i, (melody, lyric) in enumerate(zip(melody_unlearn, lyric_unlearn)):
+        m, l = cut_window(melody, lyric)
+        cut_melody_unlearn.extend(m)
+        cut_lyric_unlearn.extend(l)
+        song_id_unlearn.extend([i] * len(m))
 
     cut_melody_valid, cut_lyric_valid, song_id_valid = [], [], []
     for i, (melody, lyric) in enumerate(zip(melody_valid, lyric_valid)):
@@ -364,6 +373,14 @@ def main(args):
         lines = list(map(lower_fn, sliding_melody_train))
         f.writelines(lines)
 
+    with open(os.path.join(output_para_dir, "unlearn.lyric"), "w") as f:
+        lines = list(map(lower_fn, cut_lyric_unlearn))
+        f.writelines(lines)
+
+    with open(os.path.join(output_para_dir, "unlearn.melody"), "w") as f:
+        lines = list(map(lower_fn, cut_melody_unlearn))
+        f.writelines(lines)
+
     with open(os.path.join(output_para_dir, "valid.lyric"), "w") as f:
         lines = list(map(lower_fn, cut_lyric_valid))
         f.writelines(lines)
@@ -385,6 +402,10 @@ def main(args):
         f.writelines(lines)
 
     with open(os.path.join(output_para_dir, "song_id_test.txt"), "w") as f:
+        lines = list(map(lambda x: str(x) + "\n", song_id_test))
+        f.writelines(lines)
+
+    with open(os.path.join(output_para_dir, "song_id_unlearn.txt"), "w") as f:
         lines = list(map(lambda x: str(x) + "\n", song_id_test))
         f.writelines(lines)
 
