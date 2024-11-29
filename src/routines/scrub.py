@@ -92,7 +92,6 @@ def train_distill(
 
     end = time.time()
     for idx, sample in enumerate(train_loader):
-        print(idx)
         avged_loss = torch.zeros(1)
         count = 0
         for lang_pair in sample.keys():
@@ -167,9 +166,7 @@ def train_distill(
         return kd_losses.avg
 
 
-def scrub(model, dataloader):
-    teacher = copy.deepcopy(model)
-    student = copy.deepcopy(model)
+def scrub(teacher, student, dataloader):
     module_list = nn.ModuleList([])
     module_list.append(teacher)
     module_list.append(student)

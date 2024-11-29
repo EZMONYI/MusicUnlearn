@@ -192,6 +192,7 @@ threshold_loss_scale: null
 tie_adaptive_weights: false
 tokenizer: null
 tpu: false
+training: true
 train_subset: train
 update_freq:
 - 1

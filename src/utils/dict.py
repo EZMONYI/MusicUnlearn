@@ -1,9 +1,14 @@
 import os
-from collections import Counter
+import re
 
 import torch
 
-from .helpers import tokenize_line
+
+def tokenize_line(line):
+    space_normalizer = re.compile(r"\s+")
+    line = space_normalizer.sub(" ", line)
+    line = line.strip()
+    return line.split()
 
 
 class Dictionary(object):
@@ -30,7 +35,6 @@ class Dictionary(object):
         if extra_special_symbols:
             for s in extra_special_symbols:
                 self.add_symbol(s)
-        self.nspecial = len(self.symbols)
         self.mask_word = mask
         self.mask_index = self.add_symbol(mask)
         self.nspecial = len(self.symbols)
@@ -82,54 +86,6 @@ class Dictionary(object):
                 self.indices[word] = idx
                 self.symbols.append(word)
                 self.count.append(new_dict.count[idx2])
-
-    def finalize(self, threshold=-1, nwords=-1, padding_factor=8):
-        """Sort symbols by frequency in descending order, ignoring special ones.
-
-        Args:
-            - threshold defines the minimum word count
-            - nwords defines the total number of words in the final dictionary,
-                including special symbols
-            - padding_factor can be used to pad the dictionary size to be a
-                multiple of 8, which is important on some hardware (e.g., Nvidia
-                Tensor Cores).
-        """
-        if nwords <= 0:
-            nwords = len(self)
-
-        new_indices = dict(zip(self.symbols[: self.nspecial], range(self.nspecial)))
-        new_symbols = self.symbols[: self.nspecial]
-        new_count = self.count[: self.nspecial]
-
-        c = Counter(
-            dict(
-                sorted(zip(self.symbols[self.nspecial:], self.count[self.nspecial:]))
-            )
-        )
-        for symbol, count in c.most_common(nwords - self.nspecial):
-            if count >= threshold:
-                new_indices[symbol] = len(new_symbols)
-                new_symbols.append(symbol)
-                new_count.append(count)
-            else:
-                break
-
-        assert len(new_symbols) == len(new_indices)
-
-        self.count = list(new_count)
-        self.symbols = list(new_symbols)
-        self.indices = new_indices
-
-        self.pad_to_multiple_(padding_factor)
-
-    def pad_to_multiple_(self, padding_factor):
-        """Pad Dictionary size to be a multiple of *padding_factor*."""
-        if padding_factor > 1:
-            i = 0
-            while len(self) % padding_factor != 0:
-                symbol = "madeupword{:04d}".format(i)
-                self.add_symbol(symbol, n=0)
-                i += 1
 
     def bos(self):
         """Helper to get index of beginning-of-sentence symbol"""
@@ -214,9 +170,10 @@ class Dictionary(object):
     def save(self, f):
         self._save(
             f,
-            zip(self.symbols[self.nspecial:],
+            zip(
+                self.symbols[self.nspecial:],
                 self.count[self.nspecial:],
-            )
+            ),
         )
 
     def encode_line(

@@ -43,7 +43,8 @@ def main(args):
         )
         print("| [{}] dictionary: {} types".format(lang, len(dicts[lang])))
 
-    model = build_model(args, dicts)
+    teacher = build_model(args, dicts)
+    student = build_model(args, dicts)
     dataset = build_datasets(args, dicts, "train", args.training)
     dataset.ordered_indices()
 
@@ -52,9 +53,10 @@ def main(args):
     )
     ckpt = torch.load(args.checkpoint_path)
 
-    model.load_state_dict(ckpt, strict=False)
+    teacher.load_state_dict(ckpt, strict=False)
+    student.load_state_dict(ckpt, strict=False)
 
-    scrub(model, dataloader)
+    scrub(teacher, student, dataloader)
     
 
 if __name__ == "__main__":
