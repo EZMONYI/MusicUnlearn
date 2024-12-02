@@ -28,7 +28,7 @@ def build_model(args, dicts):
     args.share_decoder_input_output_embed = True
     encoders, decoders = {}, {}
 
-    for lang in langs:
+    for lang in lang:
         encoder_embed_tokens = embed_tokens[lang]
         decoder_embed_tokens = encoder_embed_tokens
         if lang in args.source_langs:
@@ -1078,7 +1078,6 @@ class XTransformerEncoder(nn.Module):
         self.mask_idx = dictionary.mask_index
 
         self.dropout_module = Dropout(args.dropout)
-        self.encoder_layerdrop = args.encoder_layerdrop
 
         embed_dim = embed_tokens.embedding_dim
         self.padding_idx = embed_tokens.padding_idx
@@ -1368,9 +1367,6 @@ class XTransformerModel(nn.Module):
         positions=None,
     ):
         encoder_out = self.encoders[src_key](src_tokens, src_lengths)
-
-        input_encoder_out = encoder_out["encoder_out"]
-        input_encoder_padding_mask = encoder_out["encoder_padding_mask"]
 
         src_len = src_tokens.size()[1]
         tgt_len = prev_output_tokens.size()[1]

@@ -71,7 +71,7 @@ class MusicMassDataset(torch.utils.data.Dataset):
         self.lang_id = lang_id
         self.ratio = ratio
         self.training = training
-        self.pred_probs = pred_probs
+        self.pred_probs = torch.as_tensor(pred_probs)
 
         self.sep_token = vocab.nspecial
         self.align_token = self.sep_token + 1

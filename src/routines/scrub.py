@@ -42,8 +42,13 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-def compute_forward(model, sample, sample_key):
-    net_output = model(**sample[sample_key]["net_input"])
+def compute_forward(model, sample, sample_key, lang_pair):
+    if sample_key[:4] == "mass":
+        keys = sample_key[5:].split('-')
+    else:
+        keys = sample_key.split("-")
+    src_key, tgt_key = keys[0], keys[1]
+    net_output = model(**sample[sample_key]["net_input"], src_key=src_key, tgt_key=tgt_key)
     logits = model.get_normalized_probs(net_output, log_probs=True).transpose(1, 2)
     return net_output, logits
 

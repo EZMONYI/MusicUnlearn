@@ -1,5 +1,4 @@
 import argparse
-from routines.scrub import scrub
 import logging
 import os
 import sys
@@ -9,6 +8,7 @@ import torch
 import yaml
 from torch.utils.data import DataLoader
 
+from routines.scrub import scrub
 from utils.dict import Dictionary
 from utils.helpers import build_datasets
 from utils.model import (
@@ -32,9 +32,9 @@ logger = logging.getLogger(__name__)
 
 
 def main(args):
-    assert (
-        args.max_tokens is not None or args.batch_size is not None
-    ), "Must specify batch size either with --max-tokens or --batch-size"
+    # assert (
+    #     args.max_tokens is not None or args.batch_size is not None
+    # ), "Must specify batch size either with --max-tokens or --batch-size"
     dicts = OrderedDict()
 
     for lang in args.langs:
@@ -57,7 +57,7 @@ def main(args):
     student.load_state_dict(ckpt, strict=False)
 
     scrub(teacher, student, dataloader)
-    
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
