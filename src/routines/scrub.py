@@ -1,4 +1,3 @@
-import copy
 import sys
 import time
 from argparse import Namespace
@@ -44,13 +43,15 @@ class AverageMeter(object):
 
 def compute_forward(model, sample, sample_key, lang_pair):
     if sample_key[:4] == "mass":
-        keys = sample_key[5:].split('-')
+        keys = sample_key[5:].split("-")
     else:
         keys = sample_key.split("-")
     src_key, tgt_key = keys[0], keys[1]
-    net_output = model(**sample[sample_key]["net_input"], src_key=src_key, tgt_key=tgt_key)
+    net_output = model(
+        **sample[sample_key]["net_input"], src_key=src_key, tgt_key=tgt_key
+    )[0]
     logits = model.get_normalized_probs(net_output, log_probs=True).transpose(1, 2)
-    return net_output, logits
+    return net_output, logits # 8, 152, 417
 
 
 def adjust_learning_rate(epoch, opt, optimizer):
@@ -104,10 +105,10 @@ def train_distill(
             if sample_key.startswith("mass"):
                 lang_pair = sample_key.split(":")[-1]
             net_input = sample[sample_key]["net_input"]["src_tokens"]
-            net_output_s, logit_s, target_s = compute_forward(
+            net_output_s, logit_s = compute_forward(
                 model_s, sample, sample_key, lang_pair
             )
-            net_output_t, logit_t, target_t = compute_forward(
+            net_output_t, logit_t = compute_forward(
                 model_t, sample, sample_key, lang_pair
             )
             # data_time.update(time.time() - end)

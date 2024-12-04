@@ -28,7 +28,7 @@ def build_model(args, dicts):
     args.share_decoder_input_output_embed = True
     encoders, decoders = {}, {}
 
-    for lang in lang:
+    for lang in langs:
         encoder_embed_tokens = embed_tokens[lang]
         decoder_embed_tokens = encoder_embed_tokens
         if lang in args.source_langs:
@@ -115,7 +115,7 @@ class PositionalEmbedding(nn.Module):
             .detach()
         )
 
-    def make_positions(tensor, padding_idx: int):
+    def make_positions(self, tensor, padding_idx: int):
         mask = tensor.ne(padding_idx).int()
         return (torch.cumsum(mask, dim=1).type_as(mask) * mask).long() + padding_idx
 
@@ -768,9 +768,9 @@ class TransformerEncoderLayer(nn.Module):
         super().__init__()
         self.embed_dim = args.encoder_embed_dim
         self.self_attn = MultiheadAttention(
-            self.embed_dim,
-            args.encoder_attention_heads,
-            dropout=args.attention_dropout,
+            self.embed_dim,  # 512
+            args.encoder_attention_heads,  # 8
+            dropout=args.attention_dropout,  # 0.1
             self_attention=True,
         )
         self.self_attn_layer_norm = nn.LayerNorm(
@@ -786,14 +786,6 @@ class TransformerEncoderLayer(nn.Module):
 
         self.final_layer_norm = nn.LayerNorm(
             self.embed_dim, eps=1e-5, elementwise_affine=True
-        )
-
-    def build_self_attention(self, embed_dim, args):
-        return MultiheadAttention(
-            embed_dim,
-            args.encoder_attention_heads,
-            dropout=args.attention_dropout,
-            self_attention=True,
         )
 
     def residual_connection(self, x, residual):
@@ -1191,8 +1183,6 @@ class XTransformerDecoder(nn.Module):
 
         self.layer_norm = None
 
-        self.project_out_dim = nn.Linear(embed_dim, self.output_embed_dim, bias=False)
-
         self.adaptive_softmax = None
         self.output_projection = None
 
@@ -1320,7 +1310,7 @@ class XTransformerDecoder(nn.Module):
 
         return x, {"attn": attn, "inner_states": inner_states, "attns": attns}
 
-    def buffered_future_mask(tensor, future_mask):
+    def buffered_future_mask(self, tensor, future_mask):
         def fill_with_neg_inf(t):
             """FP16-compatible function that fills a tensor with -inf."""
             return t.float().fill_(float("-inf")).type_as(t)

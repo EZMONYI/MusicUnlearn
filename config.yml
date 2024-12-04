@@ -1,6 +1,8 @@
-checkpoint_path: /home/yi/Documents/projects/MusicUnlearn/ckpts/songmass.pth
+checkpoint_path: /home/yi/Documents/projects/music-unlearn/ckpts/songmass.pth
 activation_dropout: 0.1
-data: /home/yi/Documents/projects/MusicUnlearn/lmd_data/processed
+attention_dropout: 0.1
+data: /home/yi/Documents/projects/music-unlearn/lmd_data/processed
+dropout: 0.1
 decoder_embed_dim: 512
 decoder_output_dim: 512
 decoder_ffn_embed_dim: 2048
