@@ -123,8 +123,8 @@ class MusicMtDataset(torch.utils.data.Dataset):
         src_lang="",
         tgt_lang="",
     ):
-        self.src = src
-        self.tgt = tgt
+        self.src = src  # MMap
+        self.tgt = tgt  # MMap
         self.src_sizes = np.array(src_sizes)
         self.tgt_sizes = np.array(tgt_sizes)
         self.src_lang_id = src_lang_id

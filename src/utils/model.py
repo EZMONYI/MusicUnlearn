@@ -1347,7 +1347,7 @@ class XTransformerModel(nn.Module):
 
     def forward(
         self,
-        src_tokens,
+        src_tokens,  # 8, 148
         src_lengths,
         prev_output_tokens,
         source_sent_ids,
@@ -1356,7 +1356,9 @@ class XTransformerModel(nn.Module):
         tgt_key,
         positions=None,
     ):
-        encoder_out = self.encoders[src_key](src_tokens, src_lengths)
+        encoder_out = self.encoders[src_key](
+            src_tokens, src_lengths
+        )  # 148, 8, 512 token_size, batch_size, seq_length
 
         src_len = src_tokens.size()[1]
         tgt_len = prev_output_tokens.size()[1]
