@@ -1,7 +1,7 @@
+# model configs
 checkpoint_path: /home/yi/Documents/projects/music-unlearn/ckpts/songmass.pth
 activation_dropout: 0.1
 attention_dropout: 0.1
-data: /home/yi/Documents/projects/music-unlearn/lmd_data/processed
 dropout: 0.1
 decoder_embed_dim: 512
 decoder_output_dim: 512
@@ -10,22 +10,21 @@ decoder_layers: 6
 encoder_layers: 6
 encoder_layerdrop: 0
 encoder_embed_dim: 512
-source_langs:
-- lyric
-- melody
 share_all_embeddings: false
 encoder_attention_heads: 8
 decoder_attention_heads: 8
 encoder_ffn_embed_dim: 2048
+
+# dataset configs
+data: /home/yi/Documents/projects/music-unlearn/lmd_data/processed
 target_langs:
 - lyric
 - melody
 langs:
 - lyric
 - melody
-langs_id:
-  lyric: 0
-  melody: 1
+left_pad_source: true
+left_pad_target: false
 max_source_positions: 1024
 max_target_positions: 1024
 mass_steps:
@@ -44,3 +43,6 @@ pred_probs:
 - 0.8
 - 0.1
 - 0.1
+source_langs:
+- lyric
+- melody

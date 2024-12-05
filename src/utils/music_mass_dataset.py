@@ -89,7 +89,7 @@ class MusicMassDataset(torch.utils.data.Dataset):
             source = []
             source_sent_ids = []
             for i in range(len(sep_positions) - 1):
-                sent = src_list[sep_positions[i] + 1 : sep_positions[i + 1]]
+                sent = src_list[sep_positions[i] + 1:sep_positions[i + 1]]
                 sent = [ch for ch in sent if ch != self.align_token]
                 source.extend(sent)
                 source_sent_ids.extend([i] * len(sent))
@@ -111,7 +111,7 @@ class MusicMassDataset(torch.utils.data.Dataset):
             s = []
             source_sent_ids = []
             for i in range(len(sep_positions) - 1):
-                sent = src_list[sep_positions[i] + 1 : sep_positions[i + 1]]
+                sent = src_list[sep_positions[i] + 1:sep_positions[i + 1]]
                 sent = [ch for ch in sent if ch != self.align_token]
                 s.extend(sent)
                 source_sent_ids.extend([i] * len(sent))
@@ -144,16 +144,16 @@ class MusicMassDataset(torch.utils.data.Dataset):
                 else:
                     mask_start, mask_length = self.mask_interval(seg_start, seg_end)
 
-                output.extend(s[mask_start : mask_start + mask_length].copy())
+                output.extend(s[mask_start:mask_start + mask_length].copy())
 
                 for j in range(mask_start, mask_start + mask_length):
                     target_sent_ids.append(source_sent_ids[j])
                 if mask_start == 0:
                     t = [self.vocab.eos_index] + s[
-                        mask_start : mask_start + mask_length - 1
+                        mask_start:mask_start + mask_length - 1
                     ].copy()
                 else:
-                    t = s[mask_start - 1 : mask_start + mask_length - 1].copy()
+                    t = s[mask_start - 1:mask_start + mask_length - 1].copy()
 
                 if self.lang == "lyric":
                     for w in t:
@@ -205,7 +205,7 @@ class MusicMassDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.src)
 
-    def _collate(self, samples, pad_idx, eos_idx, segment_label):
+    def _collate(self, samples, pad_idx, eos_idx):
         def merge(key, left_pad):
             return collate_tokens(
                 [s[key] for s in samples],
@@ -263,7 +263,6 @@ class MusicMassDataset(torch.utils.data.Dataset):
             samples,
             pad_idx=self.vocab.pad(),
             eos_idx=self.vocab.eos(),
-            segment_label=self.lang_id,
         )
 
     def get_dummy_batch(self, num_tokens, max_positions, tgt_len=128):

@@ -43,7 +43,7 @@ done
 python src/preprocess.py \
 	--source-lang lyric --target-lang melody \
 	--trainpref $para_data_dir/train --validpref $para_data_dir/valid \
-	--unlearnpref $mono_data_dir/unlearn \
+	--unlearnpref $para_data_dir/unlearn \
 	--destdir $save_dir \
 	--srcdict $para_data_dir/dict.lyric.txt \
 	--tgtdict $para_data_dir/dict.melody.txt \
@@ -52,6 +52,7 @@ python src/preprocess.py \
 python src/preprocess.py \
 	--source-lang melody --target-lang lyric \
 	--trainpref $para_data_dir/train --validpref $para_data_dir/valid \
+	--unlearnpref $para_data_dir/unlearn \
 	--destdir $save_dir \
 	--srcdict $para_data_dir/dict.melody.txt \
 	--tgtdict $para_data_dir/dict.lyric.txt \

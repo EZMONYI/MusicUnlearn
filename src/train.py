@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 
 from routines.scrub import scrub
 from utils.dict import Dictionary
-from utils.helpers import build_datasets
+from utils.helpers import load_data
 from utils.model import (
     build_model,
 )
@@ -45,11 +45,11 @@ def main(args):
 
     teacher = build_model(args, dicts)
     student = build_model(args, dicts)
-    dataset = build_datasets(args, dicts, "train", args.training)
+    dataset = load_data(args, dicts, "train", args.training)
     dataset.ordered_indices()
 
     dataloader = DataLoader(
-        dataset, shuffle=True, batch_size=8, collate_fn=dataset.collater
+        dataset, batch_size=8, collate_fn=dataset.collater
     )
     ckpt = torch.load(args.checkpoint_path)
 

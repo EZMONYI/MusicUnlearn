@@ -112,8 +112,6 @@ class MusicMtDataset(torch.utils.data.Dataset):
         tgt_sizes,
         src_vocab,
         tgt_vocab,
-        src_lang_id,
-        tgt_lang_id,
         left_pad_source=True,
         left_pad_target=False,
         max_source_positions=1024,
@@ -125,10 +123,8 @@ class MusicMtDataset(torch.utils.data.Dataset):
     ):
         self.src = src  # MMap
         self.tgt = tgt  # MMap
-        self.src_sizes = np.array(src_sizes)
+        self.src_sizes = np.array(src_sizes)  # dataset.sizes()
         self.tgt_sizes = np.array(tgt_sizes)
-        self.src_lang_id = src_lang_id
-        self.tgt_lang_id = tgt_lang_id
         self.src_vocab = src_vocab
         self.tgt_vocab = tgt_vocab
         self.left_pad_source = left_pad_source

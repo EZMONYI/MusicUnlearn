@@ -261,7 +261,7 @@ def _get_mt_dataset_key(lang_pair):
     return "" + lang_pair
 
 
-def build_datasets(args, dicts, split, training):
+def load_data(args, dicts, split, training):
     def split_exists(split, lang):
         filename = os.path.join(args.data, "{}.{}".format(split, lang))
         return os.path.exists(index_file_path(filename)) and os.path.exists(
@@ -333,7 +333,6 @@ def build_datasets(args, dicts, split, training):
         tgt_key = key + "." + tgt
         src_dataset = src_para_datasets[src_key]
         tgt_dataset = src_para_datasets[tgt_key]
-        src_id, tgt_id = args.langs_id[src], args.langs_id[tgt]
 
         mt_para_dataset[lang_pair] = MusicMtDataset(
             src_dataset,
@@ -342,8 +341,6 @@ def build_datasets(args, dicts, split, training):
             tgt_dataset.sizes,
             dicts[src],
             dicts[tgt],
-            src_id,
-            tgt_id,
             left_pad_source=args.left_pad_source,
             left_pad_target=args.left_pad_target,
             max_source_positions=args.max_source_positions,
@@ -356,7 +353,6 @@ def build_datasets(args, dicts, split, training):
     if split != "train":
         for lang_pair in args.valid_lang_pairs:  # lyric-lyric, melody-melody
             src, tgt = lang_pair.split("-")
-            src_id, tgt_id = args.langs_id[src], args.langs_id[tgt]
             if src == tgt:
                 src_key = src + "-" + tgt
                 tgt_key = src + "-" + tgt
@@ -375,8 +371,6 @@ def build_datasets(args, dicts, split, training):
                 tgt_dataset.sizes,
                 dicts[src],
                 dicts[tgt],
-                src_id,
-                tgt_id,
                 left_pad_source=args.left_pad_source,
                 left_pad_target=args.left_pad_target,
                 max_source_positions=args.max_source_positions,
@@ -400,7 +394,6 @@ def build_datasets(args, dicts, split, training):
                 max_source_positions=args.max_source_positions,
                 max_target_positions=args.max_target_positions,
                 shuffle=True,
-                lang_id=args.langs_id[lang],
                 ratio=args.word_mask,
                 pred_probs=args.pred_probs,
                 lang=lang,
