@@ -33,7 +33,7 @@ def collate_tokens(
             dst.copy_(src)
 
     for i, v in enumerate(values):
-        copy_tensor(v, res[i][size - len(v) :] if left_pad else res[i][: len(v)])
+        copy_tensor(v, res[i][size - len(v):] if left_pad else res[i][: len(v)])
     return res
 
 
@@ -152,7 +152,7 @@ class MusicMtDataset(torch.utils.data.Dataset):
         sep_positions.insert(0, -1)
         sentences = []
         for i in range(len(sep_positions) - 1):
-            sentences.append(src_list[sep_positions[i] + 1 : sep_positions[i + 1]])
+            sentences.append(src_list[sep_positions[i] + 1: sep_positions[i + 1]])
 
         source = []
         source_sent_ids = []
@@ -184,14 +184,16 @@ class MusicMtDataset(torch.utils.data.Dataset):
         sep_positions.insert(0, -1)
         sentences = []
         for i in range(len(sep_positions) - 1):
-            sentences.append(tgt_list[sep_positions[i] + 1 : sep_positions[i + 1]])
+            sentences.append(tgt_list[sep_positions[i] + 1: sep_positions[i + 1]])
 
         target = []
         target_sent_ids = []
         target_word_ids = []
         word_idx = 0
         for i, s in enumerate(sentences):
-            for t in s:
+            for (
+                t
+            ) in s:  # remove [align] which is 6, record word_id seqs and send_ids seq
                 if t == self.align_token:
                     word_idx += 1
                 else:
@@ -204,7 +206,7 @@ class MusicMtDataset(torch.utils.data.Dataset):
             target_word_ids.append(word_idx)
             word_idx += 1
 
-        target.append(self.tgt_vocab.eos_index)
+        target.append(self.tgt_vocab.eos_index)  # append eos which 2
         target_sent_ids.append(-2)  # -2 for tgt non words
         target_word_ids.append(word_idx)  # eos token word align
         assert len(target) == len(target_sent_ids)
@@ -212,8 +214,8 @@ class MusicMtDataset(torch.utils.data.Dataset):
 
         return {
             "id": index,
-            "source": torch.LongTensor(source),
-            "target": torch.LongTensor(target),
+            "source": torch.LongTensor(source),  # seq without [align]
+            "target": torch.LongTensor(target),  # seq without [align]
             "source_sent_ids": torch.LongTensor(source_sent_ids),
             "target_sent_ids": torch.LongTensor(target_sent_ids),
             "source_word_ids": torch.LongTensor(source_word_ids),

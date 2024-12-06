@@ -41,14 +41,14 @@ def _warmup_mmap_file(path):
 
 class DatasetBuilder(object):
     def __init__(self, out_file, dtype=np.int64):
-        self._data_file = open(out_file, "wb")
+        self._data_file = open(out_file, "wb")  # dict encoded array list
         self._dtype = dtype
         self._sizes = []
 
     def add_item(self, tensor):
         np_array = np.array(tensor.numpy(), dtype=self._dtype)
-        self._data_file.write(np_array.tobytes(order="C"))
-        self._sizes.append(np_array.size)
+        self._data_file.write(np_array.tobytes(order="C"))  # dictionary encoded array
+        self._sizes.append(np_array.size)  # encoded array length
 
     def merge_file_(self, another_file):
         # Concatenate index
@@ -81,7 +81,7 @@ class DatasetBuilder(object):
                 _file.write(struct.pack("<B", code(dtype)))
                 pointers = _get_pointers(sizes)
 
-                _file.write(struct.pack("<Q", len(sizes)))
+                _file.write(struct.pack("<Q", len(sizes)))  # number of sequences
 
                 sizes = np.array(sizes, dtype=np.int32)
                 _file.write(sizes.tobytes(order="C"))
@@ -101,7 +101,7 @@ class MMapIndex(object):
             self._dtype = dtypes[dtype_code]
             self._dtype_size = self._dtype().itemsize
 
-            self._len = struct.unpack("<Q", stream.read(8))[0]
+            self._len = struct.unpack("<Q", stream.read(8))[0]  # number of sequences
             offset = stream.tell()
 
         _warmup_mmap_file(path)
@@ -110,7 +110,7 @@ class MMapIndex(object):
         self._bin_buffer = memoryview(self._bin_buffer_mmap)
         self._sizes = np.frombuffer(
             self._bin_buffer, dtype=np.int32, count=self._len, offset=offset
-        )
+        )  # sequence lengths
         self._pointers = np.frombuffer(
             self._bin_buffer,
             dtype=np.int64,
@@ -132,7 +132,9 @@ class MMapIndex(object):
 
     @lru_cache(maxsize=8)
     def __getitem__(self, i):
-        return self._pointers[i], self._sizes[i]
+        return self._pointers[i], self._sizes[
+            i
+        ]  # _pointers[i]: starting location, _sizes[i]: number of sequences
 
     def __len__(self):
         return self._len

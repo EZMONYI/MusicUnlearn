@@ -31,7 +31,7 @@ def collate_tokens(
             dst.copy_(src)
 
     for i, v in enumerate(values):
-        copy_tensor(v, res[i][size - len(v) :] if left_pad else res[i][: len(v)])
+        copy_tensor(v, res[i][size - len(v):] if left_pad else res[i][: len(v)])
     return res
 
 
@@ -89,7 +89,7 @@ class MusicMassDataset(torch.utils.data.Dataset):
             source = []
             source_sent_ids = []
             for i in range(len(sep_positions) - 1):
-                sent = src_list[sep_positions[i] + 1:sep_positions[i + 1]]
+                sent = src_list[sep_positions[i] + 1: sep_positions[i + 1]]
                 sent = [ch for ch in sent if ch != self.align_token]
                 source.extend(sent)
                 source_sent_ids.extend([i] * len(sent))
@@ -107,18 +107,21 @@ class MusicMassDataset(torch.utils.data.Dataset):
 
             sep_positions = [i for i, x in enumerate(src_list) if x == self.sep_token]
             sep_positions.insert(0, -1)
+            # get position for all [sep] tokens, append -1 at 0 for processing the first sentence
 
-            s = []
+            s = []  # all tokens without [align] and [sep]
             source_sent_ids = []
             for i in range(len(sep_positions) - 1):
-                sent = src_list[sep_positions[i] + 1:sep_positions[i + 1]]
-                sent = [ch for ch in sent if ch != self.align_token]
+                sent = src_list[sep_positions[i] + 1: sep_positions[i + 1]]
+                sent = [ch for ch in sent if ch != self.align_token]  # remove [align]
                 s.extend(sent)
                 source_sent_ids.extend([i] * len(sent))
 
             segment_num = round(
                 len(s) / (self.mask_len_expect_per_segment / self.ratio)
             )
+            if segment_num > 1:
+                print(segment_num)
             segment_num = max(1, segment_num)
             seg_len = len(s) // segment_num
 
@@ -144,16 +147,16 @@ class MusicMassDataset(torch.utils.data.Dataset):
                 else:
                     mask_start, mask_length = self.mask_interval(seg_start, seg_end)
 
-                output.extend(s[mask_start:mask_start + mask_length].copy())
+                output.extend(s[mask_start: mask_start + mask_length].copy()) # original tokens at masked index
 
                 for j in range(mask_start, mask_start + mask_length):
                     target_sent_ids.append(source_sent_ids[j])
                 if mask_start == 0:
                     t = [self.vocab.eos_index] + s[
-                        mask_start:mask_start + mask_length - 1
+                        mask_start: mask_start + mask_length - 1
                     ].copy()
                 else:
-                    t = s[mask_start - 1:mask_start + mask_length - 1].copy()
+                    t = s[mask_start - 1: mask_start + mask_length - 1].copy()
 
                 if self.lang == "lyric":
                     for w in t:
@@ -165,15 +168,15 @@ class MusicMassDataset(torch.utils.data.Dataset):
                         if w is not None:
                             source.append(w)
                 else:
-                    t = t[1:] + [t[0]]
-                    t2 = []
+                    t = t[1:] + [t[0]] # move head to tail
+                    t2 = [] # masked sequence
                     for i in range(0, len(t), 2):
                         pit, dur = self.random_pitch_duration(
                             t[i], t[i + 1], self.pred_probs
                         )
                         t2.append(pit)
                         t2.append(dur)
-                    t = [t2[-1]] + t2[:-1]
+                    t = [t2[-1]] + t2[:-1] # move tail to head
                     target.extend(t)
 
                     assert seg_start % 2 == 0
@@ -307,7 +310,9 @@ class MusicMassDataset(torch.utils.data.Dataset):
     def size(self, index):
         return (self.sizes[index], int(round(self.sizes[index] * self.ratio)))
 
-    def mask_word(self, w):
+    def mask_word(
+        self, w
+    ):  # 0.8 => <mask>, 0.1 => random token in dict, 0.1 => no change
         p = np.random.random()
         if p >= 0.2:
             return self.vocab.mask_index
@@ -354,9 +359,9 @@ class MusicMassDataset(torch.utils.data.Dataset):
 
     def random_duration(self, w, pred_probs):
         cands = [
-            self.vocab.mask_index,
-            np.random.randint(self.duration_start, len(self.vocab)),
-            w,
+            self.vocab.mask_index,  # <mask>
+            np.random.randint(self.duration_start, len(self.vocab)),  # random
+            w,  # original
         ]
         prob = torch.multinomial(self.pred_probs, 1, replacement=True)
         return cands[prob]
@@ -376,9 +381,9 @@ class MusicMassDataset(torch.utils.data.Dataset):
         rnd_pit = np.random.randint(self.pitch_start, self.duration_start)
         rnd_dur = np.random.randint(self.duration_start, len(self.vocab))
         cands = [
-            (self.vocab.mask_index, self.vocab.mask_index),
-            (rnd_pit, rnd_dur),
-            (pit, dur),
+            (self.vocab.mask_index, self.vocab.mask_index),  # <mask>
+            (rnd_pit, rnd_dur),  # random
+            (pit, dur),  # original
         ]
         prob = torch.multinomial(self.pred_probs, 1, replacement=True)
         return cands[prob]
