@@ -496,11 +496,6 @@ class MultiheadAttention(nn.Module):
 
 
 class MaskedMHAttention(MultiheadAttention):
-    """Multi-headed attention.
-
-    See "Attention Is All You Need" for more details.
-    """
-
     def __init__(
         self,
         embed_dim,
