@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "name": "train",
+            "type": "python",
+            "request": "launch",
+            "pythonPath": "${env:CONDA_PREFIX}/bin/python",
+            "program": "${workspaceFolder}/unlearn/train.py",
+            "args": [
+                "-c", "${workspaceFolder}/config.yml"
+            ],
+            "console": "integratedTerminal",
+            "subProcess": false
+        },
+        {
+            "name": "debug",
+            "type": "python",
+            "request": "launch",
+            "pythonPath": "${env:CONDA_PREFIX}/bin/python",
+            "program": "${workspaceFolder}/unlearn/debug.py",
+            "args": [
+                "-c", "${workspaceFolder}/config.yml"
+            ],
+            "console": "integratedTerminal",
+            "subProcess": false
+        }
+    ]
+}

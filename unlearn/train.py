@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from routines.scrub import scrub
 from utils.dict import Dictionary
 from utils.helpers import load_data
-from utils.model import (
+from model.xtransformer import (
     build_model,
 )
 
@@ -49,7 +49,7 @@ def main(args):
     dataset.ordered_indices()
 
     dataloader = DataLoader(
-        dataset, batch_size=8, collate_fn=dataset.collater
+        dataset, batch_size=8, shuffle=True, collate_fn=dataset.collater
     )
     ckpt = torch.load(args.checkpoint_path)
 

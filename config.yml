@@ -14,6 +14,9 @@ share_all_embeddings: false
 encoder_attention_heads: 8
 decoder_attention_heads: 8
 encoder_ffn_embed_dim: 2048
+decoder_normalize_before: false
+encoder_normalize_before: false
+cross_self_attention: false
 
 # dataset configs
 data: /home/yi/Documents/projects/music-unlearn/lmd_data/processed

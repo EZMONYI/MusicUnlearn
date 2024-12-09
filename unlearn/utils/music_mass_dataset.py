@@ -54,7 +54,6 @@ class MusicMassDataset(torch.utils.data.Dataset):
         max_source_positions=1024,
         max_target_positions=1024,
         shuffle=True,
-        lang_id=None,
         ratio=None,
         training=True,
         pred_probs=None,
@@ -68,7 +67,6 @@ class MusicMassDataset(torch.utils.data.Dataset):
         self.max_source_positions = max_source_positions
         self.max_target_positions = max_target_positions
         self.shuffle = shuffle
-        self.lang_id = lang_id
         self.ratio = ratio
         self.training = training
         self.pred_probs = torch.as_tensor(pred_probs)
@@ -117,11 +115,11 @@ class MusicMassDataset(torch.utils.data.Dataset):
                 s.extend(sent)
                 source_sent_ids.extend([i] * len(sent))
 
+            # expected_segment_len = (self.mask_len_expect_per_segment / self.ratio)
+            # segment_num = segment_len / expected_segment_len
             segment_num = round(
                 len(s) / (self.mask_len_expect_per_segment / self.ratio)
             )
-            if segment_num > 1:
-                print(segment_num)
             segment_num = max(1, segment_num)
             seg_len = len(s) // segment_num
 
